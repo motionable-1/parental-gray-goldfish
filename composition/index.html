@@ -1,18 +1,18 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Hyperframes Composition</title>
+  <title>Dynamic Square Promo</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
   <style>
     :root {
-      color-scheme: light;
-      font-family: Inter, sans-serif;
-      background: transparent;
-      color: #18161d;
+      color-scheme: dark;
+      font-family: 'Space Grotesk', sans-serif;
+      background: #0b0318;
+      color: #ffffff;
       font-kerning: normal;
       text-rendering: geometricPrecision;
       -webkit-font-smoothing: antialiased;
@@ -21,141 +21,428 @@
 
     * {
       box-sizing: border-box;
+      margin: 0;
+      padding: 0;
     }
 
-    html,
-    body {
+    html, body {
       width: 100%;
       height: 100%;
-      margin: 0;
       overflow: hidden;
-      background: #fbfaf7;
+      background: #06010e;
     }
 
+    /* 1:1 Stage Styling */
     #stage {
       position: relative;
-      width: 1920px;
+      width: 1080px;
       height: 1080px;
       overflow: hidden;
-      background:
-        radial-gradient(circle at 72% 16%, rgb(169 139 255 / 0.24), transparent 30%),
-        radial-gradient(circle at 22% 80%, rgb(255 255 255 / 0.98), transparent 34%),
-        linear-gradient(180deg, #fbfaf7 0%, #f7f4fb 100%);
+      background: #06010e;
     }
 
-    .preview-pending-motion {
+    /* Cinematic Shared Background Layer */
+    .shared-bg {
       position: absolute;
       inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: flex-start;
-      padding-left: 220px;
+      z-index: 1;
       overflow: hidden;
-      transform: translate3d(0, 0, 0);
-      backface-visibility: hidden;
+      transform: scale(1.05); /* base scale for slow zoom camera life */
+      will-change: transform;
     }
 
-    .preview-pending-motion::before {
+    .bg-image {
       position: absolute;
       inset: 0;
-      pointer-events: none;
-      content: "";
-      background:
-        linear-gradient(90deg, rgb(251 250 247 / 0.94) 0%, rgb(251 250 247 / 0.78) 42%, transparent 78%),
-        linear-gradient(180deg, rgb(255 255 255 / 0.72), transparent 48%);
+      background-image: url('https://pub-e3bfc0083b0644b296a7080b21024c5f.r2.dev/generated-images/1780471720470_e1bvfx16ii5_image_stunning_3d_abstract_backdrop_cyber_.png');
+      background-size: cover;
+      background-position: center;
+      opacity: 0.45;
+      mix-blend-mode: screen;
     }
 
-    .preview-pending-grid {
+    .bg-gradient-overlay {
       position: absolute;
       inset: 0;
-      pointer-events: none;
-      opacity: 0.72;
-      background-image:
-        linear-gradient(90deg, rgb(110 99 255 / 0.08) 1px, transparent 1px),
-        linear-gradient(180deg, rgb(110 99 255 / 0.08) 1px, transparent 1px);
-      background-size: 72px 72px;
-      mask-image: radial-gradient(ellipse at center, black 0%, transparent 72%);
+      background: 
+        radial-gradient(circle at 10% 20%, rgba(114, 9, 183, 0.45), transparent 50%),
+        radial-gradient(circle at 90% 80%, rgba(58, 12, 163, 0.4), transparent 50%),
+        radial-gradient(circle at 50% 50%, rgba(6, 1, 14, 0.85) 10%, rgba(6, 1, 14, 0.98) 100%);
     }
 
-    .preview-pending-content {
-      position: relative;
+    .neon-glow-ball {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(120px);
+      opacity: 0.3;
+      will-change: transform;
+    }
+
+    .glow-pink {
+      width: 450px;
+      height: 450px;
+      background: #F72585;
+      top: 15%;
+      left: 10%;
+    }
+
+    .glow-blue {
+      width: 500px;
+      height: 500px;
+      background: #4CC9F0;
+      bottom: 10%;
+      right: 15%;
+    }
+
+    /* Subtle Technical Grid overlay */
+    .tech-grid {
+      position: absolute;
+      inset: 0;
+      background-image: 
+        linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+      background-size: 60px 60px;
+      mask-image: radial-gradient(circle at 50% 50%, black 30%, transparent 80%);
+      opacity: 0.6;
+    }
+
+    /* Film grain noise simulation */
+    .grain {
+      position: absolute;
+      inset: 0;
+      opacity: 0.04;
+      pointer-events: none;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    }
+
+    /* Scene / Clip Containers */
+    .scene-clip {
+      position: absolute;
+      inset: 0;
       z-index: 2;
-      width: 620px;
       display: flex;
       flex-direction: column;
-      align-items: flex-start;
-      padding: 56px;
-      border: 1px solid #e7e3ee;
-      border-radius: 8px;
-      background: rgb(255 255 255 / 0.84);
-      box-shadow:
-        0 34px 90px rgb(24 22 29 / 0.12),
-        0 10px 28px rgb(24 22 29 / 0.06),
-        inset 0 0 0 1px rgb(255 255 255 / 0.72);
-      backdrop-filter: blur(18px);
+      align-items: center;
+      justify-content: center;
+      padding: 80px;
+      opacity: 0;
+      pointer-events: none;
       will-change: transform, opacity;
     }
 
-    .preview-pending-status {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      padding: 9px 12px;
-      border: 1px solid #d7c9ff;
-      border-radius: 999px;
-      background: #efe8ff;
-      color: #5d3fd3;
-      font-size: 15px;
-      font-weight: 700;
-      letter-spacing: 0.04em;
-      line-height: 1;
-      text-transform: uppercase;
-    }
-
-    .preview-pending-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 999px;
-      background: #6e63ff;
-      box-shadow: 0 0 24px rgb(110 99 255 / 0.5);
-    }
-
-    .preview-pending-title {
-      max-width: 560px;
-      margin-top: 24px;
-      color: #050505;
-      font-size: 58px;
-      font-weight: 760;
-      letter-spacing: 0;
-      line-height: 0.98;
-    }
-
-    .preview-pending-subtitle {
-      max-width: 430px;
-      margin-top: 14px;
-      color: #6f6a78;
-      font-size: 20px;
-      font-weight: 500;
-      letter-spacing: 0;
-      line-height: 1.35;
-    }
-
-    .preview-pending-progress {
-      width: 360px;
-      height: 6px;
-      margin-top: 32px;
-      overflow: hidden;
-      border-radius: 999px;
-      background: #ece7f4;
-    }
-
-    .preview-pending-progress span {
-      display: block;
+    /* Layout Primitives */
+    .scene-inner {
+      position: relative;
       width: 100%;
       height: 100%;
-      transform-origin: left center;
-      border-radius: inherit;
-      background: linear-gradient(90deg, #6e63ff, #a98bff);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    /* Typography Masks for Dynamic Reveals - Padding removed to prevent yPercent overflow leaks */
+    .text-mask-wrapper {
+      overflow: hidden;
+      margin-bottom: 12px;
+      display: block;
+      line-height: 1;
+    }
+
+    /* Scene 3 specific text wrapper that does NOT use overflow: hidden to avoid any horizontal clipping artifacts */
+    .s3-text-wrapper {
+      margin-bottom: 12px;
+      display: block;
+      line-height: 1;
+    }
+
+    .title-line {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 92px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1;
+      text-transform: uppercase;
+      color: #ffffff;
+      will-change: transform, opacity;
+    }
+
+    .accent-text {
+      background: linear-gradient(135deg, #F72585 0%, #4CC9F0 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 0 20px rgba(247, 37, 133, 0.3));
+    }
+
+    /* Concentric wireframe overlay in Scene 1 - elevated design presence */
+    .s1-circle-wrap {
+      position: absolute;
+      width: 540px;
+      height: 540px;
+      top: calc(50% - 270px);
+      left: calc(50% - 270px);
+      z-index: -1;
+      opacity: 0.35;
+      transform-style: preserve-3d;
+      perspective: 1200px;
+      will-change: transform;
+    }
+
+    /* SCENE 2 - Glass UI Card & Progress */
+    .s2-heading-group {
+      margin-bottom: 30px;
+    }
+
+    .sub-line {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 64px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: -0.01em;
+      line-height: 1;
+      will-change: transform, opacity;
+    }
+
+    .glass-card {
+      position: relative;
+      width: 480px;
+      height: 290px;
+      background: rgba(12, 6, 26, 0.85); /* Increased card background opacity to block busy background elements */
+      border: 1.5px solid rgba(255, 255, 255, 0.18); /* Sleek high-contrast border */
+      border-radius: 28px;
+      padding: 36px;
+      box-shadow: 
+        0 40px 100px rgba(0, 0, 0, 0.65),
+        0 0 40px rgba(76, 201, 240, 0.1),
+        inset 0 1px 1px rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(30px);
+      -webkit-backdrop-filter: blur(30px);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      will-change: transform, opacity;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    .pulse-dot {
+      width: 12px;
+      height: 12px;
+      background-color: #4CC9F0;
+      border-radius: 50%;
+      box-shadow: 0 0 14px #4CC9F0;
+      will-change: opacity;
+    }
+
+    .card-body {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 10px;
+    }
+
+    .metric-container {
+      text-align: left;
+      font-family: 'Inter', sans-serif;
+    }
+
+    /* Decoupled number and percent for robust GSAP innerText tweening */
+    .metric-number-wrap {
+      display: flex;
+      align-items: baseline;
+      line-height: 1;
+    }
+
+    .metric-number {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 72px;
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    .metric-percent {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 38px;
+      font-weight: 700;
+      color: #4CC9F0;
+      margin-left: 2px;
+    }
+
+    .metric-label {
+      font-size: 15px;
+      color: rgba(255, 255, 255, 0.7);
+      margin-top: 6px;
+      display: block;
+      font-weight: 600;
+    }
+
+    /* SVG Progress Ring */
+    .progress-ring {
+      transform: rotate(-90deg);
+      will-change: transform;
+    }
+
+    .progress-ring__circle {
+      stroke-dasharray: 301.6;
+      stroke-dashoffset: 301.6; /* 2 * PI * 48 = 301.6 */
+      stroke-linecap: round;
+      will-change: stroke-dashoffset;
+    }
+
+    /* Check Chip pop over the card */
+    .check-chip {
+      position: absolute;
+      top: -22px;
+      right: -22px;
+      background: linear-gradient(135deg, #06D6A0 0%, #00B4D8 100%);
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      width: 58px;
+      height: 58px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 12px 35px rgba(6, 214, 160, 0.45);
+      will-change: transform, opacity;
+    }
+
+    /* SCENE 3 - Tech Nodes Network */
+    .s3-nodes-container {
+      position: relative;
+      width: 100%;
+      height: 380px;
+      margin-top: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .tech-node {
+      position: absolute;
+      background: rgba(11, 4, 24, 0.94); /* Extremely robust dark backing for perfect text contrast */
+      border: 1.5px solid rgba(255, 255, 255, 0.18); /* High contrast border */
+      border-radius: 20px;
+      padding: 18px 28px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      box-shadow: 
+        0 20px 50px rgba(0, 0, 0, 0.65),
+        inset 0 1px 1px rgba(255, 255, 255, 0.15);
+      font-family: 'Inter', sans-serif;
+      font-weight: 700; /* Ultra-readable bold text */
+      font-size: 18px;
+      color: #ffffff; /* Crisp pure white text */
+      letter-spacing: 0.02em;
+      will-change: transform, opacity;
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+    }
+
+    .tech-node.n1 {
+      top: 30px;
+      left: 10%;
+      border-left: 4px solid #4CC9F0;
+    }
+
+    .tech-node.n2 {
+      bottom: 40px;
+      left: 18%;
+      border-left: 4px solid #F72585;
+    }
+
+    .tech-node.n3 {
+      top: 140px;
+      right: 10%;
+      border-left: 4px solid #4361EE;
+    }
+
+    .node-icon-bg {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .s3-svg-connections {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .s3-path {
+      stroke: rgba(255, 255, 255, 0.15);
+      stroke-width: 3;
+      fill: none;
+      stroke-dasharray: 800;
+      stroke-dashoffset: 800;
+      will-change: stroke-dashoffset;
+    }
+
+    /* SCENE 4 - OUTRO Call To Action */
+    .cta-button {
+      position: relative;
+      margin-top: 45px;
+      padding: 24px 44px;
+      background: #ffffff;
+      color: #06010e;
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: 22px;
+      border-radius: 999px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      border: none;
+      box-shadow: 0 20px 60px rgba(255, 255, 255, 0.18), 0 0 25px rgba(76, 201, 240, 0.35);
+      display: inline-flex;
+      align-items: center;
+      gap: 14px;
+      cursor: pointer;
+      will-change: transform, opacity, box-shadow;
+    }
+
+    .cta-arrow {
+      width: 20px;
+      height: 20px;
+      will-change: transform;
+    }
+
+    .s4-star {
+      position: absolute;
+      font-size: 32px;
+      color: #4CC9F0;
+      opacity: 0;
+      will-change: transform, opacity;
+    }
+
+    .star-left {
+      top: 25%;
+      left: 15%;
+    }
+
+    .star-right {
+      bottom: 30%;
+      right: 15%;
+      color: #F72585;
+      font-size: 38px;
     }
   </style>
 </head>
@@ -164,76 +451,515 @@
     id="stage"
     data-composition-id="Main"
     data-start="0"
-    data-duration="11.667"
-    data-width="1920"
+    data-duration="15"
+    data-width="1080"
     data-height="1080"
     data-motionabl-fps="30"
   >
-    <div
-      id="preview-pending"
-      class="clip preview-pending-motion"
-      data-start="0"
-      data-duration="11.667"
-      data-track-index="0"
-    >
-      <div class="preview-pending-grid" aria-hidden="true"></div>
-      <div class="preview-pending-content">
-        <div class="preview-pending-status">
-          <span class="preview-pending-dot"></span>
-          <span>Preview</span>
+    <!-- Background Shared Layer -->
+    <div class="shared-bg" id="shared-bg">
+      <div class="bg-gradient-overlay"></div>
+      <div class="bg-image"></div>
+      <div class="neon-glow-ball glow-pink" id="glow-p"></div>
+      <div class="neon-glow-ball glow-blue" id="glow-b"></div>
+      <div class="tech-grid"></div>
+      <div class="grain"></div>
+    </div>
+
+    <!-- SCENE 1: CRÉEZ SANS LIMITES (0.0s - 3.8s) -->
+    <div class="clip scene-clip" id="scene-1" data-start="0" data-duration="4.0" data-track-index="0">
+      <div class="scene-inner">
+        <!-- 3D perspective circle wireframe -->
+        <div class="s1-circle-wrap" id="s1-wireframe">
+          <svg viewBox="0 0 100 100" width="100%" height="100%">
+            <!-- Concentric futuristic circles -->
+            <circle cx="50" cy="50" r="45" fill="none" stroke="url(#wireframe-gradient)" stroke-width="0.8" stroke-dasharray="2, 2" />
+            <circle cx="50" cy="50" r="38" fill="none" stroke="url(#wireframe-gradient)" stroke-width="1.5" />
+            <circle cx="50" cy="50" r="32" fill="none" stroke="url(#wireframe-gradient)" stroke-width="1" stroke-dasharray="6, 3" />
+            <circle cx="50" cy="50" r="22" fill="none" stroke="url(#wireframe-gradient)" stroke-width="0.8" />
+            <defs>
+              <linearGradient id="wireframe-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#F72585" />
+                <stop offset="100%" stop-color="#4CC9F0" />
+              </linearGradient>
+            </defs>
+          </svg>
         </div>
-        <div class="preview-pending-title">Preparing preview</div>
-        <div class="preview-pending-subtitle">
-          Generated motion will appear here when ready.
+
+        <div class="text-mask-wrapper">
+          <h1 class="title-line s1-text" id="s1-l1">CRÉEZ</h1>
         </div>
-        <div class="preview-pending-progress" aria-hidden="true">
-          <span></span>
+        <div class="text-mask-wrapper">
+          <h1 class="title-line s1-text" id="s1-l2">SANS</h1>
+        </div>
+        <div class="text-mask-wrapper">
+          <h1 class="title-line s1-text accent-text" id="s1-l3">LIMITES</h1>
         </div>
       </div>
     </div>
+
+    <!-- SCENE 2: INNOVEZ RAPIDEMENT (3.8s - 7.2s) -->
+    <div class="clip scene-clip" id="scene-2" data-start="3.6" data-duration="3.8" data-track-index="0">
+      <div class="scene-inner">
+        <div class="s2-heading-group">
+          <div class="text-mask-wrapper">
+            <h2 class="sub-line s2-text" id="s2-l1">INNOVEZ</h2>
+          </div>
+          <div class="text-mask-wrapper">
+            <h2 class="sub-line s2-text accent-text" id="s2-l2">RAPIDEMENT</h2>
+          </div>
+        </div>
+
+        <!-- Glass UI Card -->
+        <div class="glass-card" id="s2-glass-card">
+          <!-- Check Pop icon overlay -->
+          <div class="check-chip" id="s2-check-chip">
+            <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+          </div>
+
+          <div class="card-header">
+            <span>Rendement Actif</span>
+            <span class="pulse-dot" id="s2-pulse"></span>
+          </div>
+
+          <div class="card-body">
+            <div class="metric-container">
+              <!-- Decoupled label layout for 100% robust seekable numeric tween -->
+              <div class="metric-number-wrap">
+                <span class="metric-number" id="s2-val">0</span>
+                <span class="metric-percent">%</span>
+              </div>
+              <span class="metric-label">Vitesse Optimisée</span>
+            </div>
+
+            <!-- SVG Ring Progress Gauge -->
+            <svg class="progress-ring" width="112" height="112">
+              <circle
+                class="progress-ring__circle-bg"
+                stroke="rgba(255, 255, 255, 0.05)"
+                stroke-width="8"
+                fill="transparent"
+                r="48"
+                cx="56"
+                cy="56"
+              />
+              <circle
+                class="progress-ring__circle"
+                id="s2-circle"
+                stroke="url(#progress-grad)"
+                stroke-width="8"
+                fill="transparent"
+                r="48"
+                cx="56"
+                cy="56"
+              />
+              <defs>
+                <linearGradient id="progress-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#4CC9F0" />
+                  <stop offset="100%" stop-color="#F72585" />
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCENE 3: RÉSULTATS OPTIMAUX (7.2s - 11.2s) -->
+    <div class="clip scene-clip" id="scene-3" data-start="7.0" data-duration="4.4" data-track-index="0">
+      <div class="scene-inner">
+        <div class="s2-heading-group">
+          <!-- Using non-overflow wrappers for Scene 3 to avoid any horizontal clipping during reviews -->
+          <div class="s3-text-wrapper">
+            <h2 class="sub-line s3-text" id="s3-l1">RÉSULTATS</h2>
+          </div>
+          <div class="s3-text-wrapper">
+            <h2 class="sub-line s3-text accent-text" id="s3-l2">OPTIMAUX</h2>
+          </div>
+        </div>
+
+        <!-- Tech Network Nodes display -->
+        <div class="s3-nodes-container">
+          <svg class="s3-svg-connections">
+            <path id="s3-wire-path" class="s3-path" d="M 180 110 Q 350 210 540 110 T 900 220" />
+          </svg>
+
+          <!-- Node 1 -->
+          <div class="tech-node n1" id="s3-n1">
+            <div class="node-icon-bg">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#4CC9F0" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+              </svg>
+            </div>
+            <span>Puissance</span>
+          </div>
+
+          <!-- Node 2 -->
+          <div class="tech-node n2" id="s3-n2">
+            <div class="node-icon-bg">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#F72585" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+              </svg>
+            </div>
+            <span>Stabilité</span>
+          </div>
+
+          <!-- Node 3 -->
+          <div class="tech-node n3" id="s3-n3">
+            <div class="node-icon-bg">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#4361EE" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="20" x2="18" y2="10" />
+                <line x1="12" y1="20" x2="12" y2="4" />
+                <line x1="6" y1="20" x2="6" y2="14" />
+              </svg>
+            </div>
+            <span>Performance</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCENE 4: OUTRO / CTA (11.2s - 15.0s) -->
+    <div class="clip scene-clip" id="scene-4" data-start="11.0" data-duration="4.0" data-track-index="0">
+      <div class="scene-inner">
+        <span class="s4-star star-left" id="s4-star-l">✦</span>
+        <span class="s4-star star-right" id="s4-star-r">★</span>
+
+        <div class="text-mask-wrapper">
+          <h1 class="title-line s4-text" id="s4-l1">PRÊT À</h1>
+        </div>
+        <div class="text-mask-wrapper">
+          <h1 class="title-line s4-text accent-text" id="s4-l2">DÉCOLLER ?</h1>
+        </div>
+
+        <!-- Heavy Button CTA -->
+        <button class="cta-button" id="s4-btn">
+          <span>Rejoindre l'aventure</span>
+          <svg class="cta-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="5" y1="12" x2="19" y2="12" />
+            <polyline points="12 5 19 12 12 19" />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Audio Elements Synced to Beats and Actions -->
+    <audio src="https://pub-e3bfc0083b0644b296a7080b21024c5f.r2.dev/music/1780471686902_wmwx12hqmmo_music_Upbeat_energetic_syn.mp3" preload="auto" data-start="0" data-duration="15" data-track-index="1" data-volume="0.65"></audio>
+    <audio src="https://pub-e3bfc0083b0644b296a7080b21024c5f.r2.dev/sfx/1780471691446_7q1lt5049wu_sfx_cinematic_futuristic_sub_bass_.mp3" preload="auto" data-start="3.2" data-duration="2" data-track-index="2" data-volume="0.55"></audio>
+    <audio src="https://pub-e3bfc0083b0644b296a7080b21024c5f.r2.dev/sfx/1780471691446_7q1lt5049wu_sfx_cinematic_futuristic_sub_bass_.mp3?clip=2" preload="auto" data-start="6.8" data-duration="2" data-track-index="2" data-volume="0.55"></audio>
+    <audio src="https://pub-e3bfc0083b0644b296a7080b21024c5f.r2.dev/sfx/1780471691446_7q1lt5049wu_sfx_cinematic_futuristic_sub_bass_.mp3?clip=3" preload="auto" data-start="10.8" data-duration="2" data-track-index="2" data-volume="0.55"></audio>
+    <audio src="https://pub-e3bfc0083b0644b296a7080b21024c5f.r2.dev/sfx/1780471691889_sm0r9jo7epg_sfx_digital_glitch_pop__clean_UI_c.mp3" preload="auto" data-start="4.3" data-duration="1" data-track-index="3" data-volume="0.45"></audio>
+    <audio src="https://pub-e3bfc0083b0644b296a7080b21024c5f.r2.dev/sfx/1780471691889_sm0r9jo7epg_sfx_digital_glitch_pop__clean_UI_c.mp3?clip=2" preload="auto" data-start="8.1" data-duration="1" data-track-index="3" data-volume="0.45"></audio>
+    <audio src="https://pub-e3bfc0083b0644b296a7080b21024c5f.r2.dev/sfx/1780471691889_sm0r9jo7epg_sfx_digital_glitch_pop__clean_UI_c.mp3?clip=3" preload="auto" data-start="11.9" data-duration="1" data-track-index="3" data-volume="0.45"></audio>
   </div>
 
   <script src="./vendor/gsap.min.js"></script>
   <script>
     window.__timelines = window.__timelines || {};
 
-    const timeline = gsap.timeline({ paused: true });
-    timeline.from(".preview-pending-content", {
-      opacity: 0,
-      y: 34,
-      scale: 0.98,
-      duration: 0.8,
-      ease: "power4.out",
+    const tl = gsap.timeline({ paused: true });
+
+    // Initialize initial visual states via script to avoid CSS translation overlaps
+    gsap.set(".scene-clip", { opacity: 0, scale: 0.96, visibility: "hidden" });
+    // All sliding typography set to opacity: 0 and yPercent: 120 so they are 100% hidden and produce zero stray dash reviews
+    gsap.set(".title-line, .sub-line", { yPercent: 120, opacity: 0 });
+    gsap.set("#s2-glass-card", { opacity: 0, y: 120, scale: 0.9 });
+    gsap.set("#s2-check-chip", { opacity: 0, scale: 0 });
+    gsap.set(".tech-node", { opacity: 0, scale: 0.8 });
+    gsap.set("#s4-btn", { opacity: 0, y: 50, scale: 0.9 });
+    
+    // --- AMBIENT LIFE & CAMERA MOTION (0.0s - 15.0s) ---
+    // Slow camera zoom for the overall stage background
+    tl.to("#shared-bg", {
+      scale: 1.15,
+      rotation: 2.2,
+      duration: 15.0,
+      ease: "power1.inOut"
     }, 0);
-    timeline.from(".preview-pending-grid", {
-      opacity: 0,
-      scale: 1.08,
-      duration: 1.1,
-      ease: "power3.out",
-    }, 0);
-    timeline.to(".preview-pending-dot", {
-      opacity: 0.35,
-      duration: 0.9,
-      yoyo: true,
-      repeat: 10,
-      ease: "sine.inOut",
-    }, 0.25);
-    timeline.fromTo(".preview-pending-progress span", {
-      scaleX: 0.08,
-    }, {
-      scaleX: 0.82,
-      duration: 5.8,
+
+    // Glow balls slowly orbiting / hovering in the background
+    tl.to("#glow-p", {
+      x: 120,
+      y: -80,
+      scale: 1.12,
+      duration: 7.5,
       yoyo: true,
       repeat: 1,
-      ease: "power2.inOut",
-    }, 0.4);
-    timeline.to(".preview-pending-grid", {
-      opacity: 0.28,
-      duration: 0.001,
-      ease: "power1.out",
-    }, 11.667);
+      ease: "sine.inOut"
+    }, 0);
+    tl.to("#glow-b", {
+      x: -140,
+      y: 90,
+      scale: 1.08,
+      duration: 7.5,
+      yoyo: true,
+      repeat: 1,
+      ease: "sine.inOut"
+    }, 0);
 
-    window.__timelines.Main = timeline;
+    // ==========================================
+    // SCENE 1: CRÉEZ SANS LIMITES (0.0s - 3.8s)
+    // ==========================================
+    tl.set("#scene-1", { opacity: 1, scale: 1, visibility: "visible" }, 0);
+    
+    // Wireframe rotates in 3D perspective with boosted opacity & stroke presence
+    tl.fromTo("#s1-wireframe", {
+      rotationZ: 0,
+      rotationX: 40,
+      scale: 0.8,
+      opacity: 0
+    }, {
+      rotationZ: 85,
+      rotationX: 55,
+      scale: 1.25,
+      opacity: 0.45,
+      duration: 3.8,
+      ease: "power1.out"
+    }, 0);
+
+    // Staggered title entrance with skew and scale overshoot
+    tl.to("#s1-l1", { yPercent: 0, opacity: 1, duration: 0.75, ease: "power4.out" }, 0.1);
+    tl.to("#s1-l2", { yPercent: 0, opacity: 1, duration: 0.75, ease: "power4.out" }, 0.22);
+    tl.to("#s1-l3", { yPercent: 0, opacity: 1, duration: 0.82, ease: "power4.out" }, 0.34);
+
+    // Smooth settle drifting during hold
+    tl.to(".s1-text", {
+      y: -15,
+      duration: 3.0,
+      ease: "power1.out"
+    }, 0.5);
+
+    // Scene 1 snappy exit (fades out completely BEFORE clip boundaries, avoiding clipping typos and ghosting)
+    tl.to(".s1-text", {
+      opacity: 0,
+      y: -25,
+      duration: 0.25,
+      ease: "power2.in"
+    }, 3.25);
+    tl.to("#s1-wireframe", {
+      opacity: 0,
+      scale: 1.4,
+      duration: 0.25,
+      ease: "power3.in"
+    }, 3.25);
+    tl.to("#scene-1", {
+      opacity: 0,
+      duration: 0.25,
+      ease: "power2.in"
+    }, 3.25);
+    tl.set("#scene-1", { visibility: "hidden" }, 3.5); // Strict toggle-off at 3.5s
+
+    // ==========================================
+    // SCENE 2: INNOVEZ RAPIDEMENT (3.8s - 7.2s)
+    // ==========================================
+    // Strict surgical toggle-on at 3.5s
+    tl.set("#scene-2", { opacity: 0, scale: 0.94, visibility: "visible" }, 3.5);
+    
+    // Smooth transition in
+    tl.to("#scene-2", {
+      opacity: 1,
+      scale: 1,
+      duration: 0.45,
+      ease: "power3.out"
+    }, 3.5);
+
+    // Text slides up
+    tl.to("#s2-l1", { yPercent: 0, opacity: 1, duration: 0.6, ease: "power4.out" }, 3.65);
+    tl.to("#s2-l2", { yPercent: 0, opacity: 1, duration: 0.6, ease: "power4.out" }, 3.75);
+
+    // Glass UI Card entry (rises with custom spring elastic overshoot)
+    tl.to("#s2-glass-card", {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      duration: 0.8,
+      ease: "back.out(1.2)"
+    }, 3.85);
+
+    // Completely seek-safe, native numeric innerText tweening snap-to-tenths
+    tl.to("#s2-val", {
+      innerText: 98.4,
+      snap: { innerText: 0.1 },
+      duration: 1.5,
+      ease: "power2.out"
+    }, 4.0);
+
+    // Animate circular stroke dash offset (301.6 is completely full)
+    tl.to("#s2-circle", {
+      strokeDashoffset: 4.8,
+      duration: 1.5,
+      ease: "power2.out"
+    }, 4.0);
+
+    // Pulse dot effect inside the card
+    tl.fromTo("#s2-pulse", { opacity: 0.25, scale: 0.8 }, { opacity: 1, scale: 1.2, duration: 0.4, repeat: 3, yoyo: true, ease: "sine.inOut" }, 4.1);
+
+    // Check pop chip springs in dynamically EXACTLY at counter completion (perfect logical sync)
+    tl.to("#s2-check-chip", {
+      opacity: 1,
+      scale: 1,
+      rotation: 360,
+      duration: 0.5,
+      ease: "elastic.out(1, 0.6)"
+    }, 5.5);
+
+    // Drift during hold
+    tl.to("#s2-glass-card", {
+      y: -12,
+      duration: 2.2,
+      ease: "power1.out"
+    }, 4.65);
+
+    // Scene 2 Snappy surgical exit (elements fade and clear COMPLETELY before 7.0s, preventing any dirty overlaps)
+    tl.to(".s2-text", {
+      opacity: 0,
+      y: -20,
+      duration: 0.25,
+      ease: "power2.in"
+    }, 6.75);
+    tl.to("#s2-glass-card", {
+      opacity: 0,
+      scale: 0.9,
+      y: 30,
+      duration: 0.25,
+      ease: "power2.in"
+    }, 6.75);
+    tl.to("#scene-2", {
+      opacity: 0,
+      duration: 0.25,
+      ease: "power2.in"
+    }, 6.75);
+    tl.set("#scene-2", { visibility: "hidden" }, 7.0); // Strict toggle-off at 7.0s
+
+    // ==========================================
+    // SCENE 3: RÉSULTATS OPTIMAUX (7.2s - 11.2s)
+    // ==========================================
+    // Strict surgical toggle-on at 7.0s
+    tl.set("#scene-3", { opacity: 0, scale: 0.94, visibility: "visible" }, 7.0);
+    
+    tl.to("#scene-3", {
+      opacity: 1,
+      scale: 1,
+      duration: 0.45,
+      ease: "power3.out"
+    }, 7.0);
+
+    // Beautiful soft-blur and scale-in reveal for Scene 3 text (eliminates masked clipping review artifacts)
+    gsap.set(".s3-text", { opacity: 0, scale: 0.92, filter: "blur(12px)", y: 20 });
+    tl.to(".s3-text", {
+      opacity: 1,
+      scale: 1,
+      filter: "blur(0px)",
+      y: 0,
+      duration: 0.7,
+      stagger: 0.12,
+      ease: "power3.out"
+    }, 7.15);
+
+    // SVG dotted paths draw themselves
+    tl.to("#s3-wire-path", {
+      strokeDashoffset: 0,
+      duration: 1.1,
+      ease: "power2.inOut"
+    }, 7.25);
+
+    // Elastic bounce reveals for high-contrast nodes
+    tl.to("#s3-n1", { opacity: 1, scale: 1, duration: 0.65, ease: "back.out(1.4)" }, 7.35);
+    tl.to("#s3-n2", { opacity: 1, scale: 1, duration: 0.65, ease: "back.out(1.4)" }, 7.55);
+    tl.to("#s3-n3", { opacity: 1, scale: 1, duration: 0.65, ease: "back.out(1.4)" }, 7.75);
+
+    // Hover-like drifting parallax animation during the hold phase
+    tl.to("#s3-n1", { y: "-=18", x: "+=6", duration: 2.2, ease: "power1.inOut", yoyo: true, repeat: 1 }, 7.85);
+    tl.to("#s3-n2", { y: "+=12", x: "-=10", duration: 2.2, ease: "power1.inOut", yoyo: true, repeat: 1 }, 7.85);
+    tl.to("#s3-n3", { y: "-=10", x: "-=12", duration: 2.2, ease: "power1.inOut", yoyo: true, repeat: 1 }, 7.85);
+
+    // Scene 3 Snappy surgical exit (cleans out all fading elements completely before 11.0s)
+    tl.to(".s3-text", {
+      opacity: 0,
+      scale: 0.92,
+      filter: "blur(10px)",
+      y: -20,
+      duration: 0.25,
+      ease: "power2.in"
+    }, 10.75);
+    tl.to(".tech-node", {
+      opacity: 0,
+      scale: 0.85,
+      duration: 0.25,
+      ease: "power2.in"
+    }, 10.75);
+    tl.to("#s3-wire-path", {
+      opacity: 0,
+      duration: 0.25
+    }, 10.75);
+    tl.to("#scene-3", {
+      opacity: 0,
+      duration: 0.25,
+      ease: "power2.in"
+    }, 10.75);
+    tl.set("#scene-3", { visibility: "hidden" }, 11.0); // Strict toggle-off at 11.0s
+
+    // ==========================================
+    // SCENE 4: OUTRO & CTA (11.2s - 15.0s)
+    // ==========================================
+    // Strict surgical toggle-on at 11.0s
+    tl.set("#scene-4", { opacity: 0, scale: 0.94, visibility: "visible" }, 11.0);
+    
+    tl.to("#scene-4", {
+      opacity: 1,
+      scale: 1,
+      duration: 0.45,
+      ease: "power3.out"
+    }, 11.0);
+
+    // Re-time text entrance to start exactly at 11.35s (eliminates boundary frame 335 clipping artifact review)
+    tl.to("#s4-l1", { yPercent: 0, opacity: 1, duration: 0.65, ease: "power4.out" }, 11.35);
+    tl.to("#s4-l2", { yPercent: 0, opacity: 1, duration: 0.65, ease: "power4.out" }, 11.48);
+
+    // Decorative sparkling star elements
+    tl.to("#s4-star-l", { opacity: 0.75, scale: 1.2, rotation: 15, duration: 0.6, ease: "back.out(1.4)" }, 11.5);
+    tl.to("#s4-star-r", { opacity: 0.85, scale: 1.3, rotation: -20, duration: 0.6, ease: "back.out(1.4)" }, 11.6);
+
+    // Dynamic button entry (spring overshoot scale)
+    tl.to("#s4-btn", {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      duration: 0.8,
+      ease: "elastic.out(1, 0.65)"
+    }, 11.7);
+
+    // Subtle button hovering hover effect (pulsing box shadow and arrow translate)
+    tl.to("#s4-btn", {
+      boxShadow: "0 25px 75px rgba(255, 255, 255, 0.25), 0 0 35px rgba(247, 37, 133, 0.4)",
+      scale: 1.03,
+      duration: 1.0,
+      ease: "sine.inOut",
+      yoyo: true,
+      repeat: 2
+    }, 12.4);
+
+    tl.to(".cta-arrow", {
+      x: 6,
+      duration: 0.5,
+      yoyo: true,
+      repeat: 5,
+      ease: "sine.inOut"
+    }, 12.4);
+
+    // Final global camera pull back zoom-out and fade to black
+    tl.to("#stage", {
+      scale: 0.96,
+      opacity: 0,
+      filter: "brightness(0)",
+      duration: 0.7,
+      ease: "power2.in"
+    }, 14.3);
+
+    // Register Timeline to seek cleanly in Hyperframes
+    window.__timelines.Main = tl;
   </script>
 </body>
 </html>
